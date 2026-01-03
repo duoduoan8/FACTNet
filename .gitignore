@@ -12,13 +12,13 @@ dist/
 .idea/
 .vscode/
 
-# Data / outputs
-datasets/
-experiments/
-tb_logger/
-results/
-freq_vis/
-outputs/
+# Data / outputs (repo root)
+/datasets/
+/experiments/
+/tb_logger/
+/results/
+/freq_vis/
+/outputs/
 
 # Generated meta info files
 options/train/**/meta_info_*.txt
