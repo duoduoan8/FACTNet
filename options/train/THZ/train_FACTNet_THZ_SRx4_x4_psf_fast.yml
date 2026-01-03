@@ -1,0 +1,178 @@
+# Faster THZ_SR x4_psf paired training for FACTNet
+# - Smaller training crop (gt_size)
+# - Smaller backbone (embed_dim/depths)
+# - CUDA prefetch to reduce dataloader overhead
+
+# general settings
+name: train_FACTNet_THZ_SRx4_x4_psf_fast
+model_type: FACTNetModel
+scale: 4
+num_gpu: auto
+manual_seed: 0
+
+# dataset and data loader settings
+datasets:
+  train:
+    task: SR
+    name: THZ_SR_train_x4_psf
+    type: PairedImageDataset
+    dataroot_gt: datasets/THZ_SR/train/transform_db_method5_wash_data_no_repeat
+    dataroot_lq: datasets/THZ_SR/train/x4_psf
+    # Filter out non-image files like `_degradation.json` in x4_psf
+    meta_info_file: options/train/THZ/meta_info_THZ_SR_train_x4_psf.txt
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+    # Smaller patch -> faster iteration (LQ patch = gt_size / scale)
+    gt_size: 96
+    use_hflip: true
+    use_rot: true
+
+    # data loader
+    use_shuffle: true
+    num_worker_per_gpu: 8
+    batch_size_per_gpu: 8
+    dataset_enlarge_ratio: 1
+    # Use CUDAPrefetcher (requires pin_memory=True)
+    prefetch_mode: cuda
+    pin_memory: true
+    persistent_workers: true
+
+  val_1:
+    task: SR
+    name: split_1
+    type: PairedImageDataset
+    dataroot_gt: datasets/THZ_SR/vail/split_1
+    dataroot_lq: datasets/THZ_SR/vail/split_1_x4_psf
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  val_2:
+    task: SR
+    name: split_2
+    type: PairedImageDataset
+    dataroot_gt: datasets/THZ_SR/vail/split_2
+    dataroot_lq: datasets/THZ_SR/vail/split_2_x4_psf
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  val_3:
+    task: SR
+    name: split_3
+    type: PairedImageDataset
+    dataroot_gt: datasets/THZ_SR/vail/split_3
+    dataroot_lq: datasets/THZ_SR/vail/split_3_x4_psf
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  val_4:
+    task: SR
+    name: split_4
+    type: PairedImageDataset
+    dataroot_gt: datasets/THZ_SR/vail/split_4
+    dataroot_lq: datasets/THZ_SR/vail/split_4_x4_psf
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  val_5:
+    task: SR
+    name: split_5
+    type: PairedImageDataset
+    dataroot_gt: datasets/THZ_SR/vail/split_5
+    dataroot_lq: datasets/THZ_SR/vail/split_5_x4_psf
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  val_6:
+    task: SR
+    name: split_6
+    type: PairedImageDataset
+    dataroot_gt: datasets/THZ_SR/vail/split_6
+    dataroot_lq: datasets/THZ_SR/vail/split_6_x4_psf
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+# network structures
+network_g:
+  type: FACTNet
+  upscale: 4
+  in_chans: 3
+  img_size: 60
+  window_size: 4
+  img_range: 1.
+  # Smaller backbone for speed
+  depths: [4, 4, 4, 4]
+  embed_dim: 96
+  num_heads: [6, 6, 6, 6]
+  mlp_ratio: 2
+  upsampler: 'pixelshuffle'
+  resi_connection: 'SFB'
+
+# path
+path:
+  pretrain_network_g: ~
+  strict_load_g: true
+  resume_state: ~
+
+# training settings
+train:
+  ema_decay: 0.999
+  optim_g:
+    type: Adam
+    lr: !!float 2e-4
+    weight_decay: 0
+    betas: [0.9, 0.99]
+
+  scheduler:
+    type: MultiStepLR
+    milestones: [250000, 400000, 450000, 475000]
+    gamma: 0.5
+
+  total_iter: 500000
+  warmup_iter: -1  # no warm up
+
+  # losses
+  pixel_opt:
+    type: MSELoss
+    loss_weight: 1.0
+    reduction: mean
+
+# validation settings
+val:
+  # Validation on 6 splits (~1092 images) is expensive; run it less frequently.
+  val_freq: !!float 5e4
+  save_img: false
+  pbar: false
+
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: true
+      better: higher
+    ssim:
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: true
+      better: higher
+
+# logging settings
+logger:
+  print_freq: 50
+  save_checkpoint_freq: !!float 5e3
+  use_tb_logger: true
+  wandb:
+    project: ~
+    resume_id: ~
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500

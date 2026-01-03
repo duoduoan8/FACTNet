@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Editors
+.idea/
+.vscode/
+
+# Data / outputs
+datasets/
+experiments/
+tb_logger/
+results/
+freq_vis/
+outputs/
+
+# Generated meta info files
+options/train/**/meta_info_*.txt
+
+# Checkpoints / logs
+*.pth
+*.pt
+*.ckpt
+*.log
+nohup*.log
+
+# OS
+.DS_Store
