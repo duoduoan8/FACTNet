@@ -87,3 +87,12 @@ python inference/inference_factnetssr.py \
 ## Acknowledgements
 
 This codebase is built on [BasicSR](https://github.com/XPixelGroup/BasicSR).
+
+## Publish to GitHub
+
+This repo is prepared to be pushed to GitHub (no checkpoints/logs included). After you log in with GitHub CLI:
+
+```bash
+gh auth login
+bash scripts/publish_to_github.sh FACTNet public
+```
