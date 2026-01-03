@@ -90,7 +90,7 @@ if __name__ == '__main__':
         author='Dafeng Zhang',
         author_email='dfeng.zhang@samsung.com, zhdafeng@163.com',
         keywords='computer vision, restoration, image super resolution',
-        url='https://github.com/yourname/FACTNet',
+        url='https://github.com/duoduoan8/FACTNet',
         include_package_data=True,
         packages=find_packages(exclude=('options', 'datasets', 'experiments', 'results', 'tb_logger', 'wandb')),
         classifiers=[

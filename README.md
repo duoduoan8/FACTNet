@@ -94,5 +94,5 @@ This repo is prepared to be pushed to GitHub (no checkpoints/logs included). Aft
 
 ```bash
 gh auth login
-bash scripts/publish_to_github.sh FACTNet public
+bash scripts/publish_to_github.sh FACTNet public https://github.com/duoduoan8/FACTNet.git
 ```
